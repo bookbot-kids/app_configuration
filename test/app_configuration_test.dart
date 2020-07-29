@@ -4,7 +4,7 @@ import 'package:app_configuration/app_configuration.dart';
 
 void main() {
   test('load app', () async {
-    final app = AppConfiguration.shared;
+    final app = AppConfiguration();
     await app.initialize();
     assert(app.logger != null);
   });

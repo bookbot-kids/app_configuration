@@ -10,9 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// App configuration contains configurations map to setup for all other services
 class AppConfiguration {
-  AppConfiguration._privateConstructor();
-  static final AppConfiguration shared = AppConfiguration._privateConstructor();
-
   /// Configurations map for the app
   Map<String, dynamic> configurations = new Map();
 
