@@ -16,7 +16,7 @@ dependencies:
   cloud_logger:
     git:
       url: git://github.com/bookbot-kids/cloud_logger.git
-      ref: 0.0.1-beta1
+      ref: 0.0.1-beta2
 
 dev_dependencies:
   flutter_test:

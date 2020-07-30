@@ -7,7 +7,6 @@ import 'package:cloud_logger/cloud_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter/foundation.dart' as Foundation;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// App configuration contains configurations map to setup for all other services
@@ -29,7 +28,12 @@ class AppConfiguration {
   /// `asset` the json file in assets folder
   ///
   /// `configs` other configs to setup
-  Future<void> initialize({String asset, Map<String, dynamic> configs}) async {
+  ///
+  /// `isRelease` whether is release mode
+  Future<void> initialize(
+      {bool isRelease = false,
+      String asset,
+      Map<String, dynamic> configs}) async {
     if (asset?.isNotEmpty == true) {
       await appendAsset(asset);
     }
@@ -41,7 +45,7 @@ class AppConfiguration {
     prefs = await SharedPreferences.getInstance();
     var outputs = List<LogOutput>();
     _azureOutput = AzureMonitorOutput(configurations);
-    if (Foundation.kReleaseMode) {
+    if (isRelease) {
       // log to cloud on release
       outputs.add(_azureOutput);
 
@@ -56,7 +60,7 @@ class AppConfiguration {
     }
 
     logger = Logger(
-        printer: Foundation.kReleaseMode ? CloudPrinter() : PrettyPrinter(),
+        printer: isRelease ? CloudPrinter() : PrettyPrinter(),
         output: MultipleOutput(outputs));
   }
 
