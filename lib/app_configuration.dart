@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/prefer_universal/io.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// App configuration contains configurations map to setup for all other services
 class AppConfiguration {
@@ -62,6 +64,42 @@ class AppConfiguration {
     logger = Logger(
         printer: isRelease ? CloudPrinter() : PrettyPrinter(),
         output: MultipleOutput(outputs));
+  }
+
+  /// Collect all crash report files saved in ios & android device
+  /// `logDir` the directory contains log files
+  /// The log file is a text file with following content: crashName####stacktrace
+  Future<void> collectCrashReports(String logDir) async {
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+      try {
+        final dir = new Directory(logDir);
+        if (await dir.exists()) {
+          // list all files in log dir
+          var files = dir.listSync(recursive: false);
+          if (files.isNotEmpty) {
+            var systemInfo = await SystemAppInfo.shared.information;
+            for (var entry in files) {
+              // Only read the text file
+              if (!entry.path.endsWith('.txt')) {
+                continue;
+              }
+
+              var f = File(entry.path);
+              var content = await f.readAsString();
+              var map = Map<String, dynamic>.from(systemInfo);
+              var parts = content.split('####');
+              map['logType'] = 'critical';
+              map['logName'] = parts.length == 2 ? parts[0] : 'CrashReport';
+              map['logContent'] = content;
+              await _azureOutput?.save(map, 'AzureMonitor');
+              await f.delete();
+            }
+          }
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
   }
 
   /// Send all the cached logs into azure monitor
